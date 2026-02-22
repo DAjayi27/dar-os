@@ -10,6 +10,7 @@ use esp_hal::main;
 use esp_hal::delay::Delay;
 use esp_hal::usb_serial_jtag::UsbSerialJtag;
 use esp_hal::gpio::{Output, Io, Level,OutputConfig};
+use esp_println::println;
 use crate::io_devices::usb_serial::write_to_serial_jtag;
 
 #[panic_handler]
@@ -34,14 +35,10 @@ fn main() -> ! {
 
 
     unsafe {
-        write_to_serial_jtag("Pin Set High");
+        write_to_serial_jtag("LED Blink test");
     }
-
-
+    
     loop {
-
-        ledPin.set_high();
-
 
         let data = "Test";
 
@@ -49,11 +46,9 @@ fn main() -> ! {
             write_to_serial_jtag(data);
         }
 
-
-
+        ledPin.toggle();
         delay.delay_millis(500);
 
-        ledPin.set_low();
     }
 
 
