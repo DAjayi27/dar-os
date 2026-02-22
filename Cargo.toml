@@ -6,7 +6,7 @@ version      = "0.1.0"
 
 [[bin]]
 name = "rusty-blinky"
-path = "./src/bin/main.rs"
+path = "src/main.rs"
 test = false
 bench = false
 
