@@ -1,7 +1,6 @@
 #![no_std]
 #![no_main]
 
-
 mod kernel;
 
 use core::panic::PanicInfo;
@@ -16,14 +15,11 @@ static HELLO: &[u8] = b"Hello World!";
 
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
-    let vga_buffer = 0xb8000 as *mut u8;
-
-    for (i, &byte) in HELLO.iter().enumerate() {
-        unsafe {
-            *vga_buffer.offset(i as isize * 2) = byte;
-            *vga_buffer.offset(i as isize * 2 + 1) = 0xb;
-        }
+    let mut writer = kernel::SCREEN_WRITER.lock();
+    for &byte in HELLO.iter() {
+        writer.write_char(byte as char);
     }
+
 
     loop {}
 }
