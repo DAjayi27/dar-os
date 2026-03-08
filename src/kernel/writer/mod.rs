@@ -1,30 +1,34 @@
+pub mod writer;
+pub use writer::{Write, Writer};
 
-pub trait Write {
-    fn new() -> Self;
-    fn write(&mut self);
-    fn write_char(&mut self, char:char);
-    fn clear_row(&mut self, row:usize );
-    fn clear_screen(&mut self);
+
+
+use lazy_static::lazy_static;
+use spin::Mutex;
+use crate::kernel::vga::VgaDriver;
+use core::fmt;
+
+
+
+
+lazy_static! {
+    pub static ref WRITER: Mutex<Writer<VgaDriver>> = Mutex::new(Writer::new());
 }
 
-pub struct Writer<T:Write> {
-    writer_driver: T,
+
+#[macro_export]
+macro_rules! print {
+    ($($arg:tt)*) => ($crate::writer::_print(format_args!($($arg)*)));
 }
 
-impl <T: Write> Writer<T>{
+#[macro_export]
+macro_rules! println {
+    () => ($crate::print!("\n"));
+    ($($arg:tt)*) => ($crate::print!("{}\n", format_args!($($arg)*)));
+}
 
-    pub fn new() -> Self{
-        return Self{
-            writer_driver: T::new(),
-        }
-    }
-    
-    pub fn write(&mut self){
-        self.writer_driver.write_char('a');
-    }
-
-    pub fn write_char(&mut self, char: char) {
-        self.writer_driver.write_char(char);
-    }
-
+#[doc(hidden)]
+pub fn _print(args: fmt::Arguments) {
+    use core::fmt::Write;
+    WRITER.lock().write_fmt(args).unwrap();
 }

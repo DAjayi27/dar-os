@@ -1,6 +1,7 @@
+use core::ptr;
 use crate::kernel::colors::{Color, ColorCode};
-use crate::kernel::writer::Write;
-use volatile::Volatile;
+use crate::kernel::writer::{Write, Writer};
+use volatile::{ VolatilePtr};
 pub const BUFFER_HEIGHT: usize = 25;
 pub const BUFFER_WIDTH: usize = 80;
 
@@ -13,7 +14,7 @@ struct ScreenChar {
 
 #[repr(transparent)]
 struct Buffer {
-    data: [[Volatile<ScreenChar>; BUFFER_WIDTH]; BUFFER_HEIGHT],
+    data: [[ScreenChar; BUFFER_WIDTH]; BUFFER_HEIGHT],
 }
 pub struct VgaDriver{
     col_pos:usize,
@@ -43,7 +44,7 @@ impl VgaDriver {
 impl Write for VgaDriver {
 
      fn new() -> Self{
-        let default_color = ColorCode::new(Color::Black,Color::White);
+        let default_color = ColorCode::new(Color::White,Color::Black);
         return Self{
             row_pos: 0,
             col_pos: 0,
@@ -52,8 +53,11 @@ impl Write for VgaDriver {
         }
     }
 
-    fn write(&mut self) {
-        // no-op: use write_char instead
+    fn write(&mut self, string: &str) {
+        
+        for i in string.chars() {
+            self.write_char(i);
+        }
     }
 
     fn write_char(&mut self,char:char){
@@ -75,7 +79,10 @@ impl Write for VgaDriver {
             color_code,
         };
 
-        self.buffer.data[self.row_pos][self.col_pos].write(screen_data);
+        unsafe {
+            let reference = &mut self.buffer.data[self.row_pos][self.col_pos];
+            ptr::write_volatile(reference as *mut ScreenChar, screen_data);
+        }
 
         self.col_pos += 1;
 
@@ -89,7 +96,13 @@ impl Write for VgaDriver {
         };
 
         for i in 0..BUFFER_WIDTH {
-            self.buffer.data[row][i].write(blank);
+
+
+            unsafe {
+                let reference = &mut self.buffer.data[row][i];
+                ptr::write_volatile(reference as *mut ScreenChar, blank);
+            }
+
         }
     }
 

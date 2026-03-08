@@ -1,16 +1,3 @@
-# 1. Fix the Windows TIB error for bare-metal
 set osabi none
-
-# 2. Tell GDB we are using 64-bit x86
 set architecture i386:x86-64
-
-# 3. Connect to the QEMU GDB server
-target remote :1234
-
-# 4. Set a breakpoint at the start of your kernel
-# Change 'blog_os::_start' to your actual entry point
-break _start
-
-# 5. Automatically continue to the breakpoint
-continue
-
+file ./target/x86_64_os/debug/DOS
