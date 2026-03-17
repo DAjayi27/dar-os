@@ -11,14 +11,11 @@ fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
-static HELLO: &str = "Hello World!";
-
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
 
-    
-    serial_print!("Serial Out Test");
 
-
-    loop {}
+    loop {
+        serial_println!("Serial Out Test");
+    }
 }
